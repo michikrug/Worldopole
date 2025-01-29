@@ -2,6 +2,7 @@
 
 namespace Worldopole;
 
+include_once __DIR__.'/QueryManagerMysqlGolbat.php';
 include_once __DIR__.'/QueryManagerMysqlRocketmap.php';
 include_once __DIR__.'/QueryManagerMysqlMonocleAlternate.php';
 include_once __DIR__.'/QueryManagerMysqlRealDeviceMap.php';
