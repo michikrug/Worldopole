@@ -107,7 +107,7 @@ abstract class QueryManager
     // Pokestops
     abstract public function getTotalPokestops();
 
-    abstract public function getAllPokestops();
+    abstract public function getAllPokestops($only_lured);
 
     // Gyms
     abstract public function getTeamGuardians($team_id);

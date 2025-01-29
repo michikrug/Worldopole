@@ -380,7 +380,8 @@ switch ($request) {
         $gym_id = $manager->getEcapedString($_GET['gym_id']);
 
         $data = $manager->getGymData($gym_id);
-        $gymData['gymDetails']['gymInfos'] = false;
+        $gymData['gymDetails'] = [];
+        $gymData['gymDetails']['gymInfos'] = [];
 
         if (!is_null($data)) {
             if (null == $data->name) {
@@ -753,7 +754,7 @@ if ('' != $postRequest) {
                 $ivMin = $manager->getEcapedString($_POST['ivMin']);
                 $ivMax = $manager->getEcapedString($_POST['ivMax']);
                 if (isset($_POST['inmap_pokemons'])) {
-                    $inmap_pokemons = $manager->getEcapedString($_POST['inmap_pokemons']);
+                    $inmap_pokemons = array_map([$manager, 'getEcapedString'], $_POST['inmap_pokemons']);
                 } else {
                     $inmap_pokemons = null;
                 }

@@ -123,11 +123,11 @@ final class QueryManagerMysqlGolbat extends QueryManagerMysql
 
     public function getRecentAll()
     {
-        $req = "SELECT pokemon_id, id as encounter_id,
-                expire_timestamp as disappear_time, changed as last_modified,
-                FROM_UNIXTIME(expire_timestamp, '%Y-%m-%d %H:%i:%s') AS disappear_time_real,
-                lat as latitude, lon as longitude, cp,
-                atk_iv as individual_attack, def_iv as individual_defense, sta_iv as individual_stamina,
+        $req = "SELECT pokemon_id, id AS encounter_id,
+                expire_timestamp AS disappear_time, changed AS last_modified,
+                DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(expire_timestamp), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS disappear_time_real,
+                lat AS latitude, lon AS longitude, cp,
+                atk_iv AS individual_attack, def_iv AS individual_defense, sta_iv AS individual_stamina,
                 move_1, move_2
                 FROM pokemon
                 ORDER BY expire_timestamp DESC
@@ -147,7 +147,7 @@ final class QueryManagerMysqlGolbat extends QueryManagerMysql
     {
         $req = "SELECT pokemon_id, id AS encounter_id,
                 expire_timestamp AS disappear_time, changed AS last_modified,
-                FROM_UNIXTIME(expire_timestamp, '%Y-%m-%d %H:%i:%s') AS disappear_time_real,
+                DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(expire_timestamp), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS disappear_time_real,
                 lat AS latitude, lon AS longitude, cp,
                 atk_iv AS individual_attack, def_iv AS individual_defense, sta_iv AS individual_stamina,
                 move_1, move_2
@@ -182,7 +182,7 @@ final class QueryManagerMysqlGolbat extends QueryManagerMysql
     public function getPokemonLastSeen($pokemon_id)
     {
         $req = "SELECT expire_timestamp,
-                FROM_UNIXTIME(expire_timestamp, '%Y-%m-%d %H:%i:%s') AS disappear_time_real,
+                DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(expire_timestamp), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS disappear_time_real,
                 lat AS latitude, lon AS longitude
                 FROM pokemon
                 WHERE pokemon_id = '".$pokemon_id."'
@@ -245,7 +245,7 @@ final class QueryManagerMysqlGolbat extends QueryManagerMysql
     public function getPokemonGraph($pokemon_id)
     {
         $req = "SELECT COUNT(*) AS total,
-                FROM_UNIXTIME(expire_timestamp, '%H') AS disappear_hour
+                SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(expire_timestamp), 'UTC', 'Europe/Berlin'), '%H') AS disappear_hour
                 FROM (SELECT expire_timestamp FROM pokemon WHERE pokemon_id = '".$pokemon_id."' LIMIT 100000) AS pokemonFiltered
                 GROUP BY disappear_hour
                 ORDER BY disappear_hour";
@@ -280,7 +280,7 @@ final class QueryManagerMysqlGolbat extends QueryManagerMysql
         }
         $req = "SELECT pokemon_id, id AS encounter_id,
                 expire_timestamp AS disappear_time, changed AS last_modified,
-                FROM_UNIXTIME(expire_timestamp, '%Y-%m-%d %H:%i:%s') AS disappear_time_real,
+                DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(expire_timestamp), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS disappear_time_real,
                 lat AS latitude, lon AS longitude, cp,
                 atk_iv AS individual_attack, def_iv AS individual_defense, sta_iv AS individual_stamina,
                 move_1, move_2
@@ -297,7 +297,9 @@ final class QueryManagerMysqlGolbat extends QueryManagerMysql
 
     public function getPokemonSliderMinMax()
     {
-        $req = "SELECT FROM_UNIXTIME(MIN(expire_timestamp), '%Y-%m-%d %H:%i:%s') AS min, FROM_UNIXTIME(MAX(expire_timestamp), '%Y-%m-%d %H:%i:%s') AS max FROM pokemon";
+        $req = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(MIN(expire_timestamp)), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS min,
+                DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(MAX(expire_timestamp)), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS max
+                FROM pokemon";
         $result = $this->mysqli->query($req);
         $data = $result->fetch_object();
 
@@ -318,7 +320,7 @@ final class QueryManagerMysqlGolbat extends QueryManagerMysql
     public function getPokemonCount($pokemon_id)
     {
         $req = 'SELECT count, last_seen, latitude, longitude
-                FROM pokemon_stats
+                FROM pokemon_stats_w
                 WHERE pid = '.$pokemon_id;
         $result = $this->mysqli->query($req);
         $data = $result->fetch_object();
@@ -329,7 +331,7 @@ final class QueryManagerMysqlGolbat extends QueryManagerMysql
     public function getPokemonCountAll()
     {
         $req = 'SELECT pid as pokemon_id, count, last_seen, latitude, longitude
-                FROM pokemon_stats
+                FROM pokemon_stats_w
                 GROUP BY pid';
         $result = $this->mysqli->query($req);
         $array = array();
@@ -386,8 +388,8 @@ final class QueryManagerMysqlGolbat extends QueryManagerMysql
 
     public function getAllPokestops($only_lured = false)
     {
-        $req = "SELECT lat AS latitude, lon AS longitude, lure_expire_timestamp, UNIX_TIMESTAMP() AS now,
-                FROM_UNIXTIME(lure_expire_timestamp, '%Y-%m-%d %H:%i:%s') AS lure_expiration_real
+        $req = "SELECT lat AS latitude, lon AS longitude, lure_expire_timestamp AS lure_expiration, UNIX_TIMESTAMP() AS now,
+                DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(lure_expire_timestamp), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS lure_expiration_real
                 FROM pokestop";
         if ($only_lured) {
             $req .= ' WHERE lure_expire_timestamp > UNIX_TIMESTAMP()';
@@ -436,7 +438,7 @@ final class QueryManagerMysqlGolbat extends QueryManagerMysql
     public function getAllGyms()
     {
         $req = "SELECT id AS gym_id, team_id, lat AS latitude, lon AS longitude,
-                FROM_UNIXTIME(updated, '%Y-%m-%d %H:%i:%s') AS last_scanned,
+                DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(updated), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS last_scanned,
                 (6 - available_slots) AS level
                 FROM gym";
         $result = $this->mysqli->query($req);
@@ -451,11 +453,11 @@ final class QueryManagerMysqlGolbat extends QueryManagerMysql
     public function getGymData($gym_id)
     {
         $req = "SELECT name, description, url, team_id AS team,
-                FROM_UNIXTIME(updated, '%Y-%m-%d %H:%i:%s') AS last_scanned,
+                DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(updated), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS last_scanned,
                 guarding_pokemon_id AS guard_pokemon_id,
                 total_cp, (6 - available_slots) AS level
                 FROM gym
-                WHERE gym_id='".$gym_id."'";
+                WHERE id='".$gym_id."'";
         $result = $this->mysqli->query($req);
         $data = $result->fetch_object();
 
@@ -534,10 +536,10 @@ final class QueryManagerMysqlGolbat extends QueryManagerMysql
         $req = "SELECT id AS gym_id, raid_level AS level,
                 raid_pokemon_id AS pokemon_id, raid_pokemon_cp AS cp,
                 raid_pokemon_move_1 AS move_1, raid_pokemon_move_2 AS move_2,
-                FROM_UNIXTIME(raid_spawn_timestamp, '%Y-%m-%d %H:%i:%s') AS spawn,
-                FROM_UNIXTIME(raid_battle_timestamp, '%Y-%m-%d %H:%i:%s') AS start,
-                FROM_UNIXTIME(raid_end_timestamp, '%Y-%m-%d %H:%i:%s') AS end,
-                FROM_UNIXTIME(updated, '%Y-%m-%d %H:%i:%s') AS last_scanned,
+                DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(raid_spawn_timestamp), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS spawn,
+                DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(raid_battle_timestamp), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS start,
+                DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(raid_end_timestamp), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS end,
+                DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(updated), 'UTC', 'Europe/Berlin'), '%Y-%m-%d %H:%i:%s') AS last_scanned,
                 name, lat AS latitude, lon AS longitude
                 FROM gym
                 WHERE raid_end_timestamp > UNIX_TIMESTAMP()".$lvl."

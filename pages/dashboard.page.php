@@ -62,7 +62,7 @@
 			<div class="col-md-12">
 				<h2 class="sub-title"><strong><?= $locales->TEAM; ?></strong> <?= $locales->PERFORMANCE; ?></h2>
 			</div>
-<!--
+
 			<div class="col-md-12">
 				<h4><?= $locales->DASHBOARD_PRESTIGE_AVERAGE; ?> <small><?= $locales->DASHBOARD_LAST7DAYS; ?></small></h4>
 			</div>
@@ -72,7 +72,6 @@
 					<canvas id="team_av"></canvas>
 				</div>
 			</div>
--->
 
 			<div class="col-md-12">
 				<h4><?= $locales->DASHBOARD_GYM_OWNED_PERFORMANCE; ?> <small><?= $locales->DASHBOARD_LAST7DAYS; ?></small></h4>
